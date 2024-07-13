@@ -18,9 +18,6 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare id: number
 
   @column()
-  declare fullName: string | null
-
-  @column()
   declare email: string
 
   @column({ serializeAs: null })
@@ -41,5 +38,5 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare entries: HasMany<typeof Entry>
 
   @hasMany(() => Permission)
-  declare declare: HasMany<typeof Permission>
+  declare permissions: HasMany<typeof Permission>
 }
