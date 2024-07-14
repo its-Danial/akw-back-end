@@ -2,6 +2,7 @@ import { HttpContext } from '@adonisjs/core/http'
 import Entry from '#models/entry'
 
 import FileService from '#providers/file_service_provider'
+import Permission from '#models/permission'
 
 export default class EntryController {
   private fileService = new FileService()
@@ -24,11 +25,29 @@ export default class EntryController {
       return { message: 'error', error: e }
     }
   }
-
-  async get({ auth, response }: HttpContext) {
+  async get({ auth, response, request }: HttpContext) {
     const user = await auth.use('api').authenticate()
+    const { id, order = 'desc' } = request.qs()
+
     try {
-      const entries = await user.related('entries').query().orderBy('created_at', 'desc')
+      const permission = await Permission.query()
+        .where('userId', user.id)
+        .andWhere('can_view_all', true)
+        .first()
+
+      let entries
+
+      if (id) {
+        entries = await Entry.query().where('id', id).first()
+      } else {
+        const query = Entry.query().orderBy('created_at', order)
+        if (permission) {
+          entries = await query
+        } else {
+          entries = await query.where('userId', user.id)
+        }
+      }
+
       return response.ok({ entries })
     } catch (e) {
       return response.notFound({ message: 'error', error: e })
