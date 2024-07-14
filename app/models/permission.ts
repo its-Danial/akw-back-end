@@ -11,6 +11,9 @@ export default class Permission extends BaseModel {
   declare userId: number
 
   @column()
+  declare can_view: boolean
+
+  @column()
   declare can_edit: boolean
 
   @column()
