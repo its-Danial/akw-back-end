@@ -7,6 +7,7 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
       table.integer('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE')
+      table.boolean('can_view').defaultTo(true)
       table.boolean('can_edit').defaultTo(true)
       table.boolean('can_delete').defaultTo(true)
       table.boolean('can_view_all').defaultTo(false)
