@@ -10,8 +10,8 @@ import { sep, normalize } from 'node:path'
 import app from '@adonisjs/core/services/app'
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
-import EntryController from '#controllers/entries_controller'
-import AdminController from '#controllers/admin_controller'
+const EntryController = () => import('#controllers/entries_controller')
+const AdminController = () => import('#controllers/admin_controller')
 const UserController = () => import('#controllers/users_controller')
 
 const PATH_TRAVERSAL_REGEX = /(?:^|[\\/])\.\.(?:[\\/]|$)/
@@ -28,10 +28,10 @@ router.delete('/logout', [UserController, 'logout']).as('user.logout').use(middl
 
 router
   .group(() => {
-    router.put('', [EntryController, 'create'])
-    router.get('', [EntryController, 'get'])
-    router.patch('/:id', [EntryController, 'update'])
-    router.delete('/:id', [EntryController, 'delete'])
+    router.post('', [EntryController, 'create'])
+    router.get('', [EntryController, 'get']).use(middleware.permission(['can_view']))
+    router.put('/:id', [EntryController, 'update']).use(middleware.permission(['can_edit']))
+    router.delete('/:id', [EntryController, 'delete']).use(middleware.permission(['can_delete']))
   })
   .prefix('entry')
   .use(middleware.auth())
@@ -39,7 +39,7 @@ router
 router
   .group(() => {
     router.get('users', [AdminController, 'listUsers'])
-    router.patch('update-user/:id', [AdminController, 'updateUserPermissions'])
+    router.put('update-user/:id', [AdminController, 'updateUserPermissions'])
   })
   .use(middleware.auth())
 
