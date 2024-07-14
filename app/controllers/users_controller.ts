@@ -10,6 +10,7 @@ export default class UserController {
 
     const permission = await user.related('permissions').create({
       userId: user.id,
+      can_view: true,
       can_edit: true,
       can_delete: true,
       can_view_all: false,
@@ -24,6 +25,7 @@ export default class UserController {
         role: user.role,
       },
       permission: {
+        canView: permission.can_view,
         canEdit: permission.can_edit,
         canDelete: permission.can_delete,
         canViewAll: permission.can_view_all,
@@ -35,7 +37,7 @@ export default class UserController {
   async login({ request }: HttpContext) {
     const { email, password } = await request.validateUsing(loginValidator)
     const user = await User.verifyCredentials(email, password)
-    const permission = await Permission.findBy('userId', user.id)
+    const permission = await Permission.findByOrFail('userId', user.id)
 
     const token = await User.accessTokens.create(user)
 
@@ -46,9 +48,10 @@ export default class UserController {
         role: user.role,
       },
       permission: {
-        canEdit: permission!.can_edit,
-        canDelete: permission!.can_delete,
-        canViewAll: permission!.can_view_all,
+        canView: permission.can_view,
+        canEdit: permission.can_edit,
+        canDelete: permission.can_delete,
+        canViewAll: permission.can_view_all,
       },
       token: token.value!.release(),
     }
