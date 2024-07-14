@@ -20,11 +20,11 @@ export default class AdminController {
       return response.unauthorized({ message: 'You cannot edit this entry' })
     }
     const targetUser = await User.findOrFail(params.id)
-    const data = request.only(['can_edit', 'can_delete', 'can_view_all'])
-    let permission = await Permission.findBy('userId', targetUser.id)
+    const data = request.only(['can_view', 'can_edit', 'can_delete', 'can_view_all'])
+    let permission = await Permission.findByOrFail('userId', targetUser.id)
 
-    permission!.merge(data)
-    await permission!.save()
+    permission.merge(data)
+    await permission.save()
     return response.ok({ permission })
   }
 }
